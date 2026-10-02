@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0d1117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>随身编程 · Python &amp; C++</title>
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="vendor/codemirror/codemirror.min.css">
+<link rel="stylesheet" href="vendor/codemirror/show-hint.css">
+<link rel="stylesheet" href="vendor/codemirror/material-darker.min.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<header id="topbar">
+  <div class="brand"><span class="logo">⚡</span>随身编程</div>
+  <div class="lang-switch">
+    <button class="lang-btn active" data-lang="py">Python</button>
+    <button class="lang-btn" data-lang="cpp">C++</button>
+  </div>
+  <div id="engine-dot" class="dot idle" title="运行引擎状态"></div>
+</header>
+
+<main id="main">
+
+  <section id="tab-edit" class="tab active">
+    <div id="editor-holder"></div>
+    <div id="symbar"></div>
+    <div id="io-zone">
+      <details id="stdin-box">
+        <summary>输入 (stdin)<span class="hint">程序用到 input() / cin 时，点开填写</span></summary>
+        <textarea id="stdin" rows="3" spellcheck="false" placeholder="每行一个输入，程序运行时依次读取…"></textarea>
+      </details>
+      <div id="runbar">
+        <button id="btn-run" class="primary">▶ 运行</button>
+        <button id="btn-stop" disabled>■ 停止</button>
+        <button id="btn-clear">清空输出</button>
+        <span id="run-status"></span>
+      </div>
+      <pre id="output" class="console">点「▶ 运行」查看结果，电脑上也可以按 Ctrl+Enter 运行。
+切换 Python / C++ 会分别记住你的代码。</pre>
+    </div>
+  </section>
+
+  <section id="tab-examples" class="tab">
+    <div id="examples-list" class="card-list"></div>
+  </section>
+
+  <section id="tab-syntax" class="tab">
+    <div id="syntax-list" class="card-list"></div>
+  </section>
+
+  <section id="tab-settings" class="tab">
+    <div class="card-list">
+      <div class="card setting-row">
+        <span>外观</span>
+        <div class="seg" id="theme-seg">
+          <button data-theme="dark" class="active">🌙 深色</button>
+          <button data-theme="light">☀️ 浅色</button>
+        </div>
+      </div>
+      <div class="card setting-row">
+        <span>运行超时</span>
+        <select id="timeout-sel">
+          <option value="5">5 秒</option>
+          <option value="10" selected>10 秒</option>
+          <option value="30">30 秒</option>
+          <option value="60">60 秒</option>
+          <option value="0">不限（可用「停止」手动终止）</option>
+        </select>
+      </div>
+      <div class="card setting-row">
+        <span>编辑器字号</span>
+        <select id="fontsize-sel">
+          <option value="14">14px</option>
+          <option value="15" selected>15px</option>
+          <option value="16">16px</option>
+          <option value="18">18px</option>
+        </select>
+      </div>
+      <div class="card setting-row">
+        <span>代码自动补全</span>
+        <div class="seg" id="hint-seg">
+          <button data-hint="on" class="active">开</button>
+          <button data-hint="off">关</button>
+        </div>
+      </div>
+      <div class="card" id="update-card">
+        <b style="font-size:14px">检查更新</b>
+        <input id="update-url" placeholder="更新源地址（如 http://192.168.1.8:8642）" spellcheck="false">
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+          <button id="btn-check-update">检查</button>
+          <button id="btn-restart-app" style="display:none">重启应用</button>
+        </div>
+        <div id="update-status" class="desc" style="margin-top:6px"></div>
+        <p class="desc" style="margin-top:6px">电脑开着「启动服务器.bat」就是更新源。网页版更新源留空即查当前站点；更新只替换界面与脚本，无需重装。仅在点「检查」时联网。</p>
+      </div>
+      <button class="card danger" id="btn-reset-code">清空已保存的代码</button>
+      <div class="card about">
+        <b>随身编程 v0.3</b>
+        <p>Python 由 Pyodide（CPython WebAssembly）真实执行，内置 numpy / pandas 数据分析库；C++ 由 JSCPP 教学子集解释执行（支持 iostream、数组、函数、流程控制，暂不支持类与 STL）。</p>
+        <p>🔒 代码与设置仅保存在本机浏览器（localStorage），不会上传。</p>
+        <p>⚙️ 首次运行某语言时需加载引擎，之后本会话内秒开。</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<nav id="tabbar">
+  <button data-tab="edit" class="active"><span>✏️</span>编辑</button>
+  <button data-tab="examples"><span>📚</span>示例</button>
+  <button data-tab="syntax"><span>📖</span>语法</button>
+  <button data-tab="settings"><span>⚙️</span>设置</button>
+</nav>
+
+<div id="toast"></div>
+
+<script src="vendor/codemirror/codemirror.min.js"></script>
+<script src="vendor/codemirror/python.min.js"></script>
+<script src="vendor/codemirror/clike.min.js"></script>
+<script src="vendor/codemirror/closebrackets.min.js"></script>
+<script src="vendor/codemirror/matchbrackets.min.js"></script>
+<script src="vendor/codemirror/show-hint.js"></script>
+<script src="vendor/codemirror/anyword-hint.js"></script>
+<script src="js/examples.js"></script>
+<script src="js/syntax.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

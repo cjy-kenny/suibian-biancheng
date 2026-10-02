@@ -1,0 +1,12 @@
+# 构建产物（均可用仓库内脚本重新生成）
+_build/
+dist/
+update/
+version.json
+android/build/
+android/assets/
+
+# 系统与临时文件
+*.log
+Thumbs.db
+.DS_Store
